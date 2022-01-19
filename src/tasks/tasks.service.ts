@@ -5,6 +5,7 @@ import { GetTaskFilterDto } from './dto/get-task-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskRepository } from './task.repository';
 import { Task } from './task.entity';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class TaskService {
@@ -12,17 +13,17 @@ export class TaskService {
     @InjectRepository(TaskRepository) private taskRepository: TaskRepository,
   ) {}
 
-  getTasks(filterDto: GetTaskFilterDto): Promise<Task[]> {
-    return this.taskRepository.getTasks(filterDto);
+  getTasks(filterDto: GetTaskFilterDto, user: User): Promise<Task[]> {
+    return this.taskRepository.getTasks(filterDto, user);
   }
   // private tasks: Task[] = [];
   // getAllTask(): Task[] {
   //   return this.tasks;
   // }
 
-  async getTaskById(id: string): Promise<Task> {
+  async getTaskById(id: string, user: User): Promise<Task> {
     // Try to get task
-    const found = await this.taskRepository.findOne(id);
+    const found = await this.taskRepository.findOne({ where: { id, user } });
 
     // if not found, throw an error (404 not found)
     if (!found) {
@@ -44,8 +45,8 @@ export class TaskService {
   //   return found;
   // }
 
-  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskRepository.createTask(createTaskDto);
+  createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+    return this.taskRepository.createTask(createTaskDto, user);
   }
 
   // createTask(createTaskDto: CreateTaskDto): Task {
@@ -60,8 +61,8 @@ export class TaskService {
   //   return task;
   // }
 
-  async updateTask(id: string, status: TaskStatus) {
-    const task = await this.getTaskById(id);
+  async updateTask(id: string, status: TaskStatus, user: User) {
+    const task = await this.getTaskById(id, user);
 
     task.status = status;
 
@@ -75,8 +76,8 @@ export class TaskService {
   //   return task;
   // }
 
-  deleteTask(id: string): Promise<void> {
-    return this.taskRepository.removeTask(id);
+  deleteTask(id: string, user: User): Promise<void> {
+    return this.taskRepository.removeTask(id, user);
   }
 
   // deleteTask(id: string): void {
